@@ -17,11 +17,21 @@
 #include "Constants.h"
 using namespace std;
 
+struct VariableDetail {
+
+	short type;
+	short specificType;
+	float value;
+	float value2;
+	float value3;
+	bool initialized;
+};
+
 class HashTable {
 
 private:
 
-unordered_map <string,pair<short,float>> table;
+unordered_map <string,VariableDetail> table;
 
 public:
 	HashTable();
@@ -29,8 +39,11 @@ public:
 
 	string myToString (float value);
 	void myToUpper (string &key);
-	void insertValue(string key, short type, float value);
-	pair<short,float> getValueByKey(string key);
+	void insertValue(string key, short type, float value = 0, short specificType = 0, float value2 = 0, float value3 = 0, bool initialized = false);
+
+	void insertValueStruct (string key, VariableDetail variableDetail);
+
+	VariableDetail getValueByKey(string key);
 	bool checkValueByKey(string key);
 };
 

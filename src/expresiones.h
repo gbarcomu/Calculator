@@ -83,14 +83,15 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 91 "expresiones.y" /* yacc.c:1909  */
+#line 140 "expresiones.y" /* yacc.c:1909  */
 
 
+  short typeOfThing;
   float value;
   char* cadena;
   bool logico;
 
-#line 94 "expresiones.h" /* yacc.c:1909  */
+#line 95 "expresiones.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
