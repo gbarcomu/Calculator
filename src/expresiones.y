@@ -14,6 +14,7 @@ extern int n_lineas;
 extern int yylex();
 
 bool isReal;
+bool execute;
 HashTable *hashTable;
 ErrorController *errorController;
 
@@ -30,8 +31,22 @@ void prompt(){
 }
 
 float getValue(string key) {
+	
+	float response;
+	
 	VariableDetail variableDetail = hashTable->getValueByKey(key);
-	return variableDetail.value;
+	
+	if (variableDetail.type == constants::TYPESENSOR or variableDetail.type == constants::TYPEACTUADOR) {
+		
+		response = variableDetail.value3;
+	}
+	
+	else {
+		
+		response = variableDetail.value;
+	}
+	
+	return response;
 }
 
 VariableDetail getAll(string key) {
@@ -115,6 +130,48 @@ string parseTypeToString(short type) {
 	return (type==constants::TYPEINTEGER)?"entero":(type==constants::TYPEREAL)?"real":"lógico";
 }
 
+/**************************************************************/
+
+void printMarcaSensor(string key) {
+	
+	VariableDetail variableDetail = getAll(key);
+	cout << "marca_sensor(" << variableDetail.value << "," 
+			<< variableDetail.value2 << "," 
+			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
+			<< key << "\"); pausa (1)" << endl;
+}
+
+void printDesactivarActuador(string key) {
+	
+	VariableDetail variableDetail = getAll(key);
+	cout << "desactivar_actuador(" << variableDetail.value << "," 
+			<< variableDetail.value2 << "," 
+			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
+			<< key << "\"); pausa (1)" << endl;
+}
+
+void printActivarActuador(string key) {
+	
+	VariableDetail variableDetail = getAll(key);
+	cout << "activar_actuador(" << variableDetail.value << "," 
+			<< variableDetail.value2 << "," 
+			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
+			<< key << "\"); pausa (1)" << endl;
+}
+
+
+void printValorSensor(string key) {
+	
+	VariableDetail variableDetail = getAll(key);
+	cout << "valor_sensor(" << variableDetail.value << "," 
+			<< variableDetail.value2 << "," 
+			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
+			<< variableDetail.value3 << "\"); pausa (1)" << endl;
+}
+
+/**************************************************************/
+
+
 void printMessagge(string id, float value, short type) {
 	
 	cout << "La instrucción " << n_lineas << " hace que la variable " << id;
@@ -170,19 +227,19 @@ void printMessagge(string id, float value, short type) {
 
 %%
 
-SHoLProgram: definitionZone SEPARATOR dataZone SEPARATOR behaviourZone {cout << "programa" << endl;}
+SHoLProgram: definitionZone SEPARATOR dataZone SEPARATOR behaviourZone
 	;
 
 definitionZone:
-	| definitionZone definition {cout << "definicion" << endl;}
-	| definitionZone declaration {cout << "declaracion" << endl;}
-	| definitionZone asignacion {cout << "asignacion" << endl;}
+	| definitionZone definition 
+	| definitionZone declaration 
+	| definitionZone asignacion 
 	;
 	
-definition: DEFINITIONSENSOR VARIABLE sensorOrActivator '<' ENTERO ',' ENTERO '>'';' {initializeSensor($2, constants::TYPESENSOR, $5, $3, $7);}
-	| DEFINITIONACTUADOR VARIABLE sensorOrActivator '<' ENTERO ',' ENTERO '>' ';' {initializeSensor($2, constants::TYPEACTUADOR, $5, $3, $7);}
-	| DEFINITIONSENSOR VARIABLE sensorOrActivator VARIABLE ';' {initializeSensorWithPair($2, constants::TYPESENSOR, $4, $3);}	
-	| DEFINITIONACTUADOR VARIABLE sensorOrActivator VARIABLE ';' {initializeSensorWithPair($2, constants::TYPEACTUADOR, $4, $3);}
+definition: DEFINITIONSENSOR VARIABLE sensorOrActivator '<' ENTERO ',' ENTERO '>'';' {initializeSensor($2, constants::TYPESENSOR, $5, $3, $7); printMarcaSensor($2);}
+	| DEFINITIONACTUADOR VARIABLE sensorOrActivator '<' ENTERO ',' ENTERO '>' ';' {initializeSensor($2, constants::TYPEACTUADOR, $5, $3, $7);printDesactivarActuador($2);}
+	| DEFINITIONSENSOR VARIABLE sensorOrActivator VARIABLE ';' {initializeSensorWithPair($2, constants::TYPESENSOR, $4, $3); printMarcaSensor($2);}	
+	| DEFINITIONACTUADOR VARIABLE sensorOrActivator VARIABLE ';' {initializeSensorWithPair($2, constants::TYPEACTUADOR, $4, $3);printDesactivarActuador($2);}
 	;
 
 sensorOrActivator: SENSORTEMPERATURE {$$ = constants::TYPETEMPERATURE;}
@@ -196,28 +253,31 @@ dataZone:
 	| dataZone data
 	;	
 
-data: VARIABLE REAL ';' {setSensor($1,$2);}
-	| VARIABLE ENTERO ';' {setSensor($1,$2);}
+data: VARIABLE REAL ';' {setSensor($1,$2);printValorSensor($1);}
+	| VARIABLE ENTERO ';' {setSensor($1,$2);printValorSensor($1);}
 	;
 	
 behaviourZone:
 	| behaviourZone behaviour
 	| behaviourZone asignacion
-	| behaviourZone action
+	| behaviourZone actions
 	;
 	
-behaviour: IF '(' expresionLogica ')' '[' behaviourZone ']' ';'
+behaviour: IF condition '[' behaviourZone ']' ';' {execute = true;}
 	| ELSE '[' behaviourZone ']' ';'
 	| WHILE ENTERO '[' behaviourZone ']' ';'
 	;
 
+condition: expresionLogica {if(!$1) {execute = false;} cout << $1 << endl;}
+	;
+
 actions: action ';'
-	| actions action
+	| actions action ';'
 	;
 
 action: ACTIVATE VARIABLE ENTERO
 	| DESACTIVATE VARIABLE ENTERO
-	| ACTIVATE VARIABLE
+	| ACTIVATE VARIABLE {if(execute){printActivarActuador($2);}}
 	| DESACTIVATE VARIABLE
 	| PAUSE ENTERO
 	;
@@ -235,22 +295,22 @@ pair : '<' ENTERO ',' ENTERO '>'
 	;	
 
 asignacion: VARIABLE '=' expresionLogica ';' { 
-	if (checkType($1,constants::TYPEBOOLEAN)){
-		printMessagge($1,$3, constants::TYPEBOOLEAN);
-		setValue($1,constants::TYPEBOOLEAN,$3);
-	}
-	else {
-		errorController->errorCatcher(constants::ERRORTYPESNOTMATCH, $1, parseTypeToString(getType($1)).c_str(), "lógico");		
-	}
+//	if (checkType($1,constants::TYPEBOOLEAN)){
+//		printMessagge($1,$3, constants::TYPEBOOLEAN);
+//		setValue($1,constants::TYPEBOOLEAN,$3);
+//	}
+//	else {
+//		errorController->errorCatcher(constants::ERRORTYPESNOTMATCH, $1, parseTypeToString(getType($1)).c_str(), "lógico");		
+//	}
 }
-       | VARIABLE '=' expresionAritmetica ';' { 
-    if (checkType($1,(isReal)?constants::TYPEREAL:constants::TYPEINTEGER)){	   
-    	printMessagge($1,$3, (isReal)?constants::TYPEREAL:constants::TYPEINTEGER);
-    	setValue($1,(isReal)?constants::TYPEREAL:constants::TYPEINTEGER,$3);
-    }
-    else {
-    	errorController->errorCatcher(constants::ERRORTYPESNOTMATCH, $1, parseTypeToString(getType($1)).c_str(), (isReal)?"real":"entero");	
-    }
+       | VARIABLE '=' expresionAritmetica ';' { setValue($1,constants::TYPEREAL,$3);
+//    if (checkType($1,(isReal)?constants::TYPEREAL:constants::TYPEINTEGER)){	   
+//    	printMessagge($1,$3, (isReal)?constants::TYPEREAL:constants::TYPEINTEGER);
+//    	setValue($1,(isReal)?constants::TYPEREAL:constants::TYPEINTEGER,$3);
+//    }
+//    else {
+//    	errorController->errorCatcher(constants::ERRORTYPESNOTMATCH, $1, parseTypeToString(getType($1)).c_str(), (isReal)?"real":"entero");	
+//    }
 }    
        | VARIABLE '=' '<' expresionAritmetica ',' expresionAritmetica '>' ';'{setValue($1,constants::TYPEPOSITION,$4,$6);}    	       	 
        ;    	   
@@ -289,7 +349,7 @@ expresionLogica: expresionAritmetica EQUALS expresionAritmetica   {$$=($1==$3)?t
        | expresionAritmetica NOTEQUALS expresionAritmetica        {$$=($1!=$3)?true:false;}
        | expresionAritmetica GREATEROREQUAL expresionAritmetica   {$$=($1>=$3)?true:false;}
        | expresionAritmetica LOWEROREQUAL expresionAritmetica     {$$=($1<=$3)?true:false;}
-       | expresionAritmetica '>' expresionAritmetica              {$$=($1>$3)?true:false;}
+       | expresionAritmetica '>' expresionAritmetica              {$$=($1>$3)?true:false; cout << $1 << " " << $3 << endl;}
        | expresionAritmetica '<' expresionAritmetica              {$$=($1<$3)?true:false;}
 
        | expresionLogica ANDAND expresionLogica                   {$$=($1&&$3)?true:false;}
@@ -303,6 +363,7 @@ int main(){
      
      n_lineas = 0;
      isReal = false;
+     execute = true;
      
      hashTable = new HashTable();
      errorController = new ErrorController();

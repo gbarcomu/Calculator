@@ -40,7 +40,7 @@ public:
 	string myToString (float value);
 	void myToUpper (string &key);
 	void insertValue(string key, short type, float value = 0, short specificType = 0, float value2 = 0, float value3 = 0, bool initialized = false);
-
+	string sensorActivatorInfo(short specificType);
 	void insertValueStruct (string key, VariableDetail variableDetail);
 
 	VariableDetail getValueByKey(string key);

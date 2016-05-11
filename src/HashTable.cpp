@@ -45,42 +45,29 @@ string typeToString (short type) {
 	return response;
 }
 
-string sensorExtraInfo(VariableDetail variableDetail) {
+string HashTable::sensorActivatorInfo(short specificType) {
 
 	stringstream response;
 
-	switch (variableDetail.type) {
+	switch (specificType) {
 
-	case constants::TYPESENSOR:
-	case constants::TYPEACTUADOR:
-
-		switch (variableDetail.specificType) {
-
-		case constants::TYPETEMPERATURE:
-			response << "temperatura";
-			break;
-		case constants::TYPEBRIGHTNESS:
-			response << "brillo";
-			break;
-		case constants::TYPESMOKE:
-			response << "humo";
-			break;
-		case constants::TYPEALARM:
-			response << "alarma";
-			break;
-		case constants::TYPELIGHT:
-			response << "luz";
-			break;
-		}
-
-		if (variableDetail.type == constants::TYPESENSOR) {
-			response << ", " << variableDetail.value3;
-		}
-
+	case constants::TYPETEMPERATURE:
+		response << "temperatura";
 		break;
-
-		default :
-			response << " ";
+	case constants::TYPEBRIGHTNESS:
+		response << "brillo";
+		break;
+	case constants::TYPESMOKE:
+		response << "humo";
+		break;
+	case constants::TYPEALARM:
+		response << "alarma";
+		break;
+	case constants::TYPELIGHT:
+		response << "luz";
+		break;
+	default :
+		response << " ";
 	}
 	return response.str();
 }
@@ -128,7 +115,7 @@ HashTable::~HashTable() {
 		cout << setfill(' ') << setw(1) << "|" << setw(15) << left << it.first
 		<< setw(1) << "|" << setw(15) << left << typeToString(it.second.type)
 		<< setw(1) << "|" << setw(15) << left << simpleOrPosition(it.second)
-		<< setw(1) << "|" << setw(20) << left << sensorExtraInfo(it.second)
+		<< setw(1) << "|" << setw(20) << left << sensorActivatorInfo(it.second.specificType)
 		<< setw(1) << "|" << endl;
 	}
 
