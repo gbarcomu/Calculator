@@ -15,6 +15,7 @@ extern int yylex();
 
 bool isReal;
 bool execute;
+int whileTimes;
 HashTable *hashTable;
 ErrorController *errorController;
 
@@ -169,6 +170,11 @@ void printValorSensor(string key) {
 			<< variableDetail.value3 << "\"); pausa (1)" << endl;
 }
 
+void printPause (int time) {
+	
+	cout << "pausa (" << time << ");" << endl;
+}
+
 /**************************************************************/
 
 
@@ -263,19 +269,24 @@ behaviourZone:
 	| behaviourZone actions
 	;
 	
-behaviour: IF condition '[' behaviourZone ']' ';' {execute = true;}
-	| ELSE '[' behaviourZone ']' ';'
-	| WHILE ENTERO '[' behaviourZone ']' ';'
+behaviour: IF condition '[' behaviourZone ']' ';' 						   {execute = true;}
+	| IF condition '[' behaviourZone ']' _else '[' behaviourZone ']' ';'   {execute = true;}
+	| WHILE repeat '[' behaviourZone ']' ';'	  						   {whileTimes = 1;}
+	;
+	
+_else: ELSE 			  												   {execute = !execute;}
 	;
 
 condition: expresionLogica {if(!$1) {execute = false;} cout << $1 << endl;}
 	;
 
+repeat: ENTERO {whileTimes = $1;}
+
 actions: action ';'
 	| actions action ';'
 	;
 
-action: ACTIVATE VARIABLE ENTERO
+action: ACTIVATE VARIABLE ENTERO {if(execute){for(int i = 0; i < whileTimes; i++){printActivarActuador($2);printPause($3);printDesactivarActuador($2);}}}
 	| DESACTIVATE VARIABLE ENTERO
 	| ACTIVATE VARIABLE {if(execute){printActivarActuador($2);}}
 	| DESACTIVATE VARIABLE
@@ -364,6 +375,7 @@ int main(){
      n_lineas = 0;
      isReal = false;
      execute = true;
+     whileTimes = 1;
      
      hashTable = new HashTable();
      errorController = new ErrorController();
