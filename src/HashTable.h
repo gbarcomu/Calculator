@@ -22,9 +22,8 @@ struct VariableDetail {
 	short type;
 	short specificType;
 	float value;
-	float value2;
-	float value3;
-	bool initialized;
+	float position1;
+	float position2;
 };
 
 class HashTable {
@@ -39,12 +38,12 @@ public:
 
 	string myToString (float value);
 	void myToUpper (string &key);
-	void insertValue(string key, short type, float value = 0, short specificType = 0, float value2 = 0, float value3 = 0, bool initialized = false);
-	string sensorActivatorInfo(short specificType);
-	void insertValueStruct (string key, VariableDetail variableDetail);
+	string sensorActuatorInfo(short specificType);
 
+	void insertValue (string key, VariableDetail variableDetail);
 	VariableDetail getValueByKey(string key);
 	bool checkValueByKey(string key);
+	string typeToString (short type);
 };
 
 #endif /* HASHTABLE_H_ */

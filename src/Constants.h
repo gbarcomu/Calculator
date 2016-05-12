@@ -15,7 +15,7 @@ const short TYPEREAL = 1;
 const short TYPEBOOLEAN = 2;
 const short TYPEPOSITION = 8;
 const short TYPESENSOR = 9;
-const short TYPEACTUADOR = 10;
+const short TYPEACTUATOR = 10;
 
 const short ERRORMODULE = 3;
 const short ERRORNONDECLARED = 4;
@@ -29,6 +29,14 @@ const short TYPEALARM = 14;
 const short TYPELIGHT = 15;
 
 const short OK = 7;
+
+const short PRINTMARKSENSOR = 20;
+const short PRINTDISABLEACTUATOR = 21;
+const short PRINTENABLEACTUATOR = 22;
+const short PRINTVALUESENSOR = 23;
+const short PRINTPAUSE = 24;
+
+
 }
 
 #endif /* CONSTANTS_H_ */

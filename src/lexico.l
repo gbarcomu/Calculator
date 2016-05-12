@@ -8,33 +8,29 @@ int n_lineas;
 
 %%
 
-[Ss][Aa][Ll][Ii][Rr]	return SALIR;
-
 "<="					return LOWEROREQUAL;
 ">="					return GREATEROREQUAL;
 "=="					return EQUALS;
 "!="					return NOTEQUALS;
 
-"&&"					return ANDAND;
-"||"					return OROR;
 "%%"					return SEPARATOR;
 "entero"				return DEFINITIONINTEGER;
 "real"					return DEFINITIONREAL;
 "posicion"				return DEFINITIONPOSITION;
 "Sensor"				return DEFINITIONSENSOR;
-"Actuador"				return DEFINITIONACTUADOR;
+"Actuador"				return DEFINITIONACTUATOR;
 "temperatura"			return SENSORTEMPERATURE;
 "luminosidad"			return SENSORBRIGHTNESS;
 "humo"					return SENSORSMOKE;
-"alarma"				return ACTUADORALARM;
-"luz"					return ACTUADORLIGHT;
+"alarma"				return ACTUATORALARM;
+"luz"					return ACTUATORLIGHT;
 "si"					return IF;
 "sino"					return ELSE;
 "repite"				return WHILE;
 "activar"				return ACTIVATE;
 "desactivar"			return DESACTIVATE;
 "pausa"					return PAUSE;
-"escribir"				return WRITE /*cadena caracteres comentarios*/;
+"escribir"				return WRITE /*TODO detectar cadena caracteres y comentarios limpiar esto de una vez!!*/;
 
 
 

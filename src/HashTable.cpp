@@ -11,7 +11,9 @@
 HashTable::HashTable() {
 }
 
-string typeToString (short type) {
+/**************PARSING METHODS********************************************/
+
+string HashTable::typeToString (short type) {
 
 	string response = "";
 
@@ -37,7 +39,7 @@ string typeToString (short type) {
 		response = "sensor";
 	break;
 
-	case constants::TYPEACTUADOR:
+	case constants::TYPEACTUATOR:
 		response = "actuador";
 	break;
 	}
@@ -45,7 +47,7 @@ string typeToString (short type) {
 	return response;
 }
 
-string HashTable::sensorActivatorInfo(short specificType) {
+string HashTable::sensorActuatorInfo(short specificType) {
 
 	stringstream response;
 
@@ -80,9 +82,9 @@ string simpleOrPosition (VariableDetail variableDetail){
 
 	case constants::TYPEPOSITION:
 	case constants::TYPESENSOR:
-	case constants::TYPEACTUADOR:
+	case constants::TYPEACTUATOR:
 
-		ss << "<" << variableDetail.value << ", " << variableDetail.value2 << ">";
+		ss << "<" << variableDetail.position1 << ", " << variableDetail.position2 << ">";
 
 		break;
 
@@ -92,7 +94,51 @@ string simpleOrPosition (VariableDetail variableDetail){
 	return ss.str();
 }
 
+/***********************************Helpers**********************************************/
+
+/* Where the magic happens :)*/
+void fooler(){}
+void foo(int l, string &key) {
+	'a'<=key[l]&&key[l]<='z'?key[l]+=-'a'+'A':key[l]+=0;
+	l!=0?foo(l-1,key):fooler();
+}
+void HashTable::myToUpper (string &key) {
+	foo(key.length()-1,key);
+}
+
+string HashTable::myToString (float value) {
+
+	stringstream ss;
+	ss << value;
+	return ss.str();
+}
+
+/****************************************************CRUD*****************************************/
+
+VariableDetail HashTable::getValueByKey(string key) {
+
+	myToUpper(key);
+	return table[key];
+}
+
+void HashTable::insertValue(string key, VariableDetail variableDetail) {
+
+	myToUpper(key);
+	table[key] = variableDetail;
+}
+
+bool HashTable::checkValueByKey(string key) {
+
+	myToUpper(key);
+
+	return table.find(key) != table.end();
+}
+
+/****************************************************************************************************/
+
 HashTable::~HashTable() {
+
+	/* Printing symbol table */
 
 	cout << "Symbol table" << endl;
 
@@ -115,64 +161,11 @@ HashTable::~HashTable() {
 		cout << setfill(' ') << setw(1) << "|" << setw(15) << left << it.first
 		<< setw(1) << "|" << setw(15) << left << typeToString(it.second.type)
 		<< setw(1) << "|" << setw(15) << left << simpleOrPosition(it.second)
-		<< setw(1) << "|" << setw(20) << left << sensorActivatorInfo(it.second.specificType)
+		<< setw(1) << "|" << setw(20) << left << sensorActuatorInfo(it.second.specificType)
 		<< setw(1) << "|" << endl;
 	}
 
 	cout << setfill('-') << setw(1) << "+" << setw(15) << "-" << setw(1) << "+"
 	<< setw(15) << "-" << setw(1) << "+" << setw(15) << "-" << setw(1)
 	<< "+" << setw(20) << "-" << setw(1) << "+" << endl;
-}
-
-void fooler(){}
-void foo(int l, string &key) {
-	'a'<=key[l]&&key[l]<='z'?key[l]+=-'a'+'A':key[l]+=0;
-	l!=0?foo(l-1,key):fooler();
-}
-void HashTable::myToUpper (string &key) {
-	foo(key.length()-1,key);
-}
-
-string HashTable::myToString (float value) {
-
-	stringstream ss;
-	ss << value;
-	return ss.str();
-}
-
-void HashTable::insertValue(string key, short type, float value, short specificType, float value2, float value3, bool initialized) {
-
-	myToUpper(key);
-
-	VariableDetail variableDetail;
-
-	variableDetail.specificType = specificType;
-	variableDetail.type = type;
-	variableDetail.value = value;
-	variableDetail.value2 = value2;
-	variableDetail.value3 = value3;
-	variableDetail.initialized = initialized;
-
-	myToUpper(key);
-
-	table[key] = variableDetail;
-}
-
-VariableDetail HashTable::getValueByKey(string key) {
-
-	myToUpper(key);
-	return table[key];
-}
-
-void HashTable::insertValueStruct(string key, VariableDetail variableDetail) {
-
-	myToUpper(key);
-	table[key] = variableDetail;
-}
-
-bool HashTable::checkValueByKey(string key) {
-
-	myToUpper(key);
-
-	return table.find(key) != table.end();
 }

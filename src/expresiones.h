@@ -45,36 +45,33 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    SALIR = 258,
-    EQUALS = 259,
-    LOWEROREQUAL = 260,
-    GREATEROREQUAL = 261,
-    NOTEQUALS = 262,
-    ANDAND = 263,
-    OROR = 264,
-    SEPARATOR = 265,
-    VARIABLE = 266,
-    ENTERO = 267,
-    REAL = 268,
-    IDENTIFICADOR = 269,
-    DEFINITIONSENSOR = 270,
-    DEFINITIONACTUADOR = 271,
-    SENSORTEMPERATURE = 272,
-    SENSORBRIGHTNESS = 273,
-    SENSORSMOKE = 274,
-    ACTUADORALARM = 275,
-    ACTUADORLIGHT = 276,
-    ACTIVATE = 277,
-    DESACTIVATE = 278,
-    PAUSE = 279,
-    WRITE = 280,
-    DEFINITIONINTEGER = 281,
-    DEFINITIONREAL = 282,
-    DEFINITIONPOSITION = 283,
-    IF = 284,
-    ELSE = 285,
-    WHILE = 286,
-    menosunario = 287
+    EQUALS = 258,
+    LOWEROREQUAL = 259,
+    GREATEROREQUAL = 260,
+    NOTEQUALS = 261,
+    SEPARATOR = 262,
+    VARIABLE = 263,
+    ENTERO = 264,
+    REAL = 265,
+    IDENTIFICADOR = 266,
+    DEFINITIONSENSOR = 267,
+    DEFINITIONACTUATOR = 268,
+    SENSORTEMPERATURE = 269,
+    SENSORBRIGHTNESS = 270,
+    SENSORSMOKE = 271,
+    ACTUATORALARM = 272,
+    ACTUATORLIGHT = 273,
+    ACTIVATE = 274,
+    DESACTIVATE = 275,
+    PAUSE = 276,
+    WRITE = 277,
+    DEFINITIONINTEGER = 278,
+    DEFINITIONREAL = 279,
+    DEFINITIONPOSITION = 280,
+    IF = 281,
+    ELSE = 282,
+    WHILE = 283,
+    menosunario = 284
   };
 #endif
 
@@ -83,15 +80,15 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 203 "expresiones.y" /* yacc.c:1909  */
+#line 178 "expresiones.y" /* yacc.c:1909  */
 
 
-  short typeOfThing;
+  short typeOfVariable;
   float value;
   char* cadena;
   bool logico;
 
-#line 95 "expresiones.h" /* yacc.c:1909  */
+#line 92 "expresiones.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
