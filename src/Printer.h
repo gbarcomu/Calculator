@@ -18,12 +18,17 @@ class Printer {
 private:
 
 	HashTable *hashTable;
+	ofstream outputFlow;
+
+	void init();
 
 public:
-	Printer(HashTable *_hashTable);
+	Printer(HashTable *_hashTable, string outputName);
 
 	void print(short typeOfSentence, string key);
+
 	void printPause(int seconds);
+	void printEndLine();
 
 	~Printer();
 };

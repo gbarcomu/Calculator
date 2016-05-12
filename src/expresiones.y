@@ -127,52 +127,6 @@ void initializeSensorWithPosition(string key, short type, string positionName, s
 	hashTable->insertValue(key,variableDetail);
 }
 
-/****************************Print Methods**********************************/
-
-//void printMarcaSensor(string key) {
-	
-//	VariableDetail variableDetail = hashTable->getValueByKey(key);
-//	cout << "marca_sensor(" << variableDetail.position1 << "," 
-//			<< variableDetail.position2 << "," 
-//			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
-//			<< key << "\"); pausa (1)" << endl;
-//}
-
-//void printDesactivarActuador(string key) {
-//	
-//	VariableDetail variableDetail = hashTable->getValueByKey(key);
-//	cout << "desactivar_actuador(" << variableDetail.position1 << "," 
-//			<< variableDetail.position2 << "," 
-//			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
-//			<< key << "\"); pausa (1)" << endl;
-//}
-//
-//void printActivarActuador(string key) {
-//	
-//	VariableDetail variableDetail = hashTable->getValueByKey(key);
-//	cout << "activar_actuador(" << variableDetail.position1 << "," 
-//			<< variableDetail.position2 << "," 
-//			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
-//			<< key << "\"); pausa (1)" << endl;
-//}
-//
-//
-//void printValorSensor(string key) {
-//	
-//	VariableDetail variableDetail = hashTable->getValueByKey(key);
-//	cout << "valor_sensor(" << variableDetail.position1 << "," 
-//			<< variableDetail.position2 << "," 
-//			<< hashTable->sensorActivatorInfo(variableDetail.specificType) << ",\"" 
-//			<< variableDetail.value << "\"); pausa (1)" << endl;
-//}
-//
-//void printPausa (int time) {
-//	
-//	cout << "pausa (" << time << ");" << endl;
-//}
-
-/**************************************************************/
-
 %}
 
 %union{
@@ -232,8 +186,8 @@ definitionZone:
 	;
 
 /* Here are recognised sensor and actuators definition with either a couple of values or a position variable */	
-definition: DEFINITIONSENSOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>'';' {initializeSensor($2, constants::TYPESENSOR, $5, $3, $7); printer->print(constants::PRINTMARKSENSOR,$2);}
-	| DEFINITIONACTUATOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>' ';' {initializeSensor($2, constants::TYPEACTUATOR, $5, $3, $7);printer->print(constants::PRINTDISABLEACTUATOR,$2);}
+definition: DEFINITIONSENSOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>'';' {initializeSensor($2, constants::TYPESENSOR, $5, $7, $3); printer->print(constants::PRINTMARKSENSOR,$2);}
+	| DEFINITIONACTUATOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>' ';' {initializeSensor($2, constants::TYPEACTUATOR, $5, $7, $3);printer->print(constants::PRINTDISABLEACTUATOR,$2);}
 	| DEFINITIONSENSOR VARIABLE sensorOrActuator VARIABLE ';' {initializeSensorWithPosition($2, constants::TYPESENSOR, $4, $3); printer->print(constants::PRINTMARKSENSOR,$2);}	
 	| DEFINITIONACTUATOR VARIABLE sensorOrActuator VARIABLE ';' {initializeSensorWithPosition($2, constants::TYPEACTUATOR, $4, $3);printer->print(constants::PRINTDISABLEACTUATOR,$2);}
 	;
@@ -296,15 +250,27 @@ action: ACTIVATE VARIABLE ENTERO /* activate a actuator, pause of n seconds and 
 	| ACTIVATE VARIABLE 
 	{
 		if(execute) { /* Activates and actuator until it is desactivated, maybe never */
-			printer->print(constants::PRINTENABLEACTUATOR,$2);
+			for(int i = 0; i < whileTimes; i++){ /*If there is a while acting repeats the instruction*/
+				printer->print(constants::PRINTENABLEACTUATOR,$2);
+			}
 		}
 	}
-
-
-	| DESACTIVATE VARIABLE ENTERO
-
 	| DESACTIVATE VARIABLE
+	{
+		if(execute) { /* Activates and actuator until it is desactivated, maybe never */
+			for(int i = 0; i < whileTimes; i++){ /*If there is a while acting repeats the instruction*/
+				printer->print(constants::PRINTDISABLEACTUATOR,$2);
+			}
+		}
+	}
 	| PAUSE ENTERO
+	{
+		if(execute) { /* Activates and actuator until it is desactivated, maybe never */
+			for(int i = 0; i < whileTimes; i++){ /*If there is a while acting repeats the instruction*/
+				printer->printPause($2);
+			}
+		}
+	}
 	;
 
 /* Empties the stack and declares the variables */
@@ -392,7 +358,7 @@ int main(int argc,char *argv[]){
      
      hashTable = new HashTable();
      errorController = new ErrorController();
-     printer = new Printer(hashTable);
+     printer = new Printer(hashTable, argv[1]);
      
      FILE *inputFile = fopen(argv[1], "r");
      yyin = inputFile;
@@ -401,6 +367,7 @@ int main(int argc,char *argv[]){
      
      delete hashTable;
      delete errorController;
+     delete printer;
      
      return 0;
 }

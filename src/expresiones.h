@@ -80,7 +80,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 178 "expresiones.y" /* yacc.c:1909  */
+#line 132 "expresiones.y" /* yacc.c:1909  */
 
 
   short typeOfVariable;

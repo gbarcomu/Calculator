@@ -7,27 +7,85 @@
 
 #include "Printer.h"
 
-Printer::Printer(HashTable *_hashTable) {
+void Printer::init() {
 
-	hashTable = _hashTable;
+	outputFlow << "#include \"entorno_shol.h\"" << endl << endl << "int main(){"
+			<< endl << "inicio();" << endl << endl;
 }
 
-void Printer::print(short typeOfSentence, string key){
+Printer::Printer(HashTable *_hashTable, string outputName) {
+
+	string name;
+	name = outputName.substr(0, outputName.length() - 4) + ".cpp";
+	outputFlow.open("outputFiles/" + name);
+	hashTable = _hashTable;
+
+	cout << "Creating " << name << " file" << endl;
+
+	init();
+}
+
+void Printer::print(short typeOfSentence, string key) {
+
+	VariableDetail variableDetail = hashTable->getValueByKey(key);
 
 	switch (typeOfSentence) {
 
+	case constants::PRINTMARKSENSOR:
+
+		outputFlow << "marca_sensor(" << variableDetail.position1 << ","
+				<< variableDetail.position2 << ","
+				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
+				<< ",\"" << key << "\");" << endl;
+		break;
+
+	case constants::PRINTDISABLEACTUATOR:
+
+		outputFlow << "desactivar_actuador(" << variableDetail.position1 << ","
+				<< variableDetail.position2 << ","
+				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
+				<< ",\"" << key << "\");" << endl;
+
+		break;
+
+	case constants::PRINTENABLEACTUATOR:
+
+		outputFlow << "activar_actuador(" << variableDetail.position1 << ","
+				<< variableDetail.position2 << ","
+				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
+				<< ",\"" << key << "\");" << endl;
+
+		break;
+
+	case constants::PRINTVALUESENSOR:
+
+		outputFlow << "valor_sensor(" << variableDetail.position1 << ","
+				<< variableDetail.position2 << ","
+				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
+				<< "," << variableDetail.value << ");" << endl;
+
+		break;
+
 	default:
 
-		cout << "hola" << endl;
+		cout << typeOfSentence << endl;
 	}
 }
 
 void Printer::printPause(int seconds) {
 
-	cout << "hola" << endl;
+	outputFlow << "pausa (" << seconds << ");" << endl;
+}
+
+void Printer::printEndLine() {
+
+	outputFlow << endl;
 }
 
 Printer::~Printer() {
 
+	outputFlow << endl << "fin()" << endl << "return 0;" << endl << "}" << endl;
+
+	outputFlow.close();
 }
 
