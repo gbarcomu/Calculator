@@ -66,6 +66,12 @@ void Printer::print(short typeOfSentence, string key) {
 
 		break;
 
+	case constants::PRINTPAUSE:
+
+		outputFlow << "pausa (" << key << ");" << endl;
+
+		break;
+
 	default:
 
 		cout << typeOfSentence << endl;

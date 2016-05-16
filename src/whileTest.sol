@@ -18,22 +18,8 @@ A 25.5;
 H 0.3;
 
 %%
-valor_umbral = 30.0;
 
-si A > valor_umbral [
-	activar L_1;
-	
-	repite 3 [
-		activar B 2;
-		pausa 5;
-	];
-	activar  L_2;
-];
-
-si H >= 1 [
-	desactivar L_1;
-	]
-sino [
-	pausa 1;
-	desactivar L_2;
+repite 3 [
+activar B 2;
+activar L_2 5;
 ];

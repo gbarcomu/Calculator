@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <stack>
+#include <list>
 #include "HashTable.h"
 #include "ErrorController.h"
 #include "Printer.h"
@@ -20,6 +21,8 @@ bool isReal;
 bool execute;
 // Determines how many times you have to execute an instruction depending on a while clause
 int whileTimes;
+// Determines if we are inside a while loop
+bool inWhile;
 
 // Store variables with its values and all the necesary information
 HashTable *hashTable;
@@ -28,7 +31,10 @@ ErrorController *errorController;
 // Create cpp code
 Printer *printer;
 
+// Stack used to keep variables before defining them
 stack <string> variablesSeparatedComma;
+// List used to keep instructions that are inside a while and repeat them later
+list <pair<short,string>> whileInstructions;
 
 
 void yyerror(const char* s){
@@ -220,11 +226,28 @@ behaviourZone:
 /* Three control productions */
 behaviour: IF condition '[' behaviourZone ']' ';' 						   {execute = true;}
 	| IF condition '[' behaviourZone ']' _else '[' behaviourZone ']' ';'   {execute = true;}
-	| WHILE repeat '[' behaviourZone ']' ';'	  						   {whileTimes = 1;}
+	| _while repeat '[' behaviourZone ']' ';'	  						   
+	{
+		for (int i = 0; i < whileTimes; i++) {
+			
+			for (std::list <pair<short,string>>::iterator it=whileInstructions.begin(); it != whileInstructions.end(); ++it) {
+				
+				pair<short,string> _pair = (pair<short,string>)*it; 
+				
+				cout << _pair.first << _pair.second << endl;
+				printer->print(_pair.first, _pair.second);
+			}	
+		}
+		
+		inWhile = false;
+	}
 	;
 
 /* Foo production that allow to switch boolean condition*/
 _else: ELSE 			  												   {execute = !execute;}
+	;
+/* Foo production that allow to set true boolean condition*/
+_while: WHILE  															   {inWhile = true;}
 	;
 
 /* Foo production that allow to change execute variable depending on the if clause */
@@ -242,32 +265,58 @@ actions: action ';'
 action: ACTIVATE VARIABLE ENTERO /* activate a actuator, pause of n seconds and desactivates the actuator*/ 
 	{
 		if(execute) { /*If there is an if acting, do or not do the action*/
-			for(int i = 0; i < whileTimes; i++){ /*If there is a while acting repeats the instruction*/
+			if(!inWhile){ /*If there is a while acting repeats the instruction*/
 				printer->print(constants::PRINTENABLEACTUATOR,$2);printer->printPause($3);printer->print(constants::PRINTDISABLEACTUATOR,$2);;
+			}
+			else {
+				
+				whileInstructions.push_back(make_pair(constants::PRINTENABLEACTUATOR,$2));
+				
+				/*Using printer class in an incorrect way, second value is the number of seconds
+				 * of the pause parsed as a string
+				 */
+				ostringstream oss;
+				oss << $3;
+				whileInstructions.push_back(make_pair(constants::PRINTPAUSE,oss.str()));
+				whileInstructions.push_back(make_pair(constants::PRINTDISABLEACTUATOR,$2));
 			}
 		}
 	}
 	| ACTIVATE VARIABLE 
 	{
-		if(execute) { /* Activates and actuator until it is desactivated, maybe never */
-			for(int i = 0; i < whileTimes; i++){ /*If there is a while acting repeats the instruction*/
+		if(execute) { /*If there is an if acting, do or not do the action*/
+			if(!inWhile){ /*If there is a while acting repeats the instruction*/
 				printer->print(constants::PRINTENABLEACTUATOR,$2);
+			}
+			else {
+				
+				whileInstructions.push_back(make_pair(constants::PRINTENABLEACTUATOR,$2));
 			}
 		}
 	}
 	| DESACTIVATE VARIABLE
 	{
-		if(execute) { /* Activates and actuator until it is desactivated, maybe never */
-			for(int i = 0; i < whileTimes; i++){ /*If there is a while acting repeats the instruction*/
+		if(execute) { /*If there is an if acting, do or not do the action*/
+			if(!inWhile){ /*If there is a while acting repeats the instruction*/
 				printer->print(constants::PRINTDISABLEACTUATOR,$2);
+			}
+			else {
+
+				whileInstructions.push_back(make_pair(constants::PRINTDISABLEACTUATOR,$2));
 			}
 		}
 	}
 	| PAUSE ENTERO
 	{
-		if(execute) { /* Activates and actuator until it is desactivated, maybe never */
-			for(int i = 0; i < whileTimes; i++){ /*If there is a while acting repeats the instruction*/
+		if(execute) { /*If there is an if acting, do or not do the action*/
+			if(!inWhile){ /*If there is a while acting repeats the instruction*/
 				printer->printPause($2);
+			}
+			else {
+				
+				ostringstream oss;
+				oss << $2;
+				whileInstructions.push_back(make_pair(constants::PRINTPAUSE,oss.str()));
 			}
 		}
 	}
@@ -355,6 +404,7 @@ int main(int argc,char *argv[]){
      isReal = false;
      execute = true;
      whileTimes = 1;
+     inWhile = false;
      
      hashTable = new HashTable();
      errorController = new ErrorController();

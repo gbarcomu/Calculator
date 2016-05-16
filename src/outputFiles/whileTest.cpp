@@ -10,8 +10,6 @@ desactivar_actuador(250,200,luz,"L_2");
 desactivar_actuador(100,320,alarma,"B");
 valor_sensor(100,100,temperatura,25.5);
 valor_sensor(100,180,humo,0.3);
-pausa (1);
-desactivar_actuador(250,200,luz,"L_2");
 
 fin()
 return 0;
