@@ -35,6 +35,10 @@ Printer *printer;
 stack <string> variablesSeparatedComma;
 // List used to keep instructions that are inside a while and repeat them later
 list <pair<short,string>> whileInstructions;
+// Previous position to define lines in plano
+pair<float,float> previousPosition;
+// First position to define lines in plano
+pair<float,float> firstPosition;
 
 
 void yyerror(const char* s){
@@ -151,6 +155,32 @@ string createMessageWithPosition(string text, string key) {
 	return oss.str();
 }
 
+void updatePreviousPositionWithPosition(string key) {
+	
+	previousPosition = getPosition(key);
+}
+
+void updatePreviousPositionWithPair(float position1, float position2) {
+	
+	previousPosition.first = position1;
+	previousPosition.second = position2;
+}
+
+void createFirstPositionWithPosition(string key) {
+	
+	updatePreviousPositionWithPosition(key);
+	
+	firstPosition = getPosition(key);
+}
+
+void createFirstPositionWithPair(float position1, float position2) {
+	
+	updatePreviousPositionWithPair(position1, position2);
+	
+	firstPosition.first = position1;
+	firstPosition.second = position2;
+}
+
 %}
 
 %union{
@@ -172,6 +202,7 @@ string createMessageWithPosition(string text, string key) {
 %token <value> ENTERO
 %token <value> REAL
 %token <value> IDENTIFICADOR
+%token PLANO
 /* Kind of sensors and activadores */
 %token DEFINITIONSENSOR DEFINITIONACTUATOR
 %token SENSORTEMPERATURE SENSORBRIGHTNESS SENSORSMOKE ACTUATORALARM ACTUATORLIGHT
@@ -209,13 +240,26 @@ definitionZone:
 	| definitionZone definition 
 	| definitionZone declaration 
 	| definitionZone assignment 
+	| definitionZone plano	
 	;
 
+/* Here is detected plano, a set of positions given by pairs or positions */
+plano: PLANO '=' '{' planoFirstPoint ',' planoPoints '}' ';' {printer->printPlanoLinePair(previousPosition,firstPosition);}
+
+planoPoints: planoPoint;
+	| planoPoints ',' planoPoint;
+
+planoPoint: VARIABLE {printer->printPlanoLinePosition(previousPosition,$1); updatePreviousPositionWithPosition($1);}
+	| '<' arithmeticExpression ',' arithmeticExpression '>' {printer->printPlanoLinePair(previousPosition,make_pair($2,$4)); updatePreviousPositionWithPair($2,$4);}
+	
+planoFirstPoint: VARIABLE {createFirstPositionWithPosition($1);}
+	| '<' arithmeticExpression ',' arithmeticExpression '>' {createFirstPositionWithPair($2,$4);}
+		
 /* Here are recognised sensor and actuators definition with either a couple of values or a position variable */	
-definition: DEFINITIONSENSOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>'';' {initializeSensor($2, constants::TYPESENSOR, $5, $7, $3); printer->print(constants::PRINTMARKSENSOR,$2);}
-	| DEFINITIONACTUATOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>' ';' {initializeSensor($2, constants::TYPEACTUATOR, $5, $7, $3);printer->print(constants::PRINTDISABLEACTUATOR,$2);}
-	| DEFINITIONSENSOR VARIABLE sensorOrActuator VARIABLE ';' {initializeSensorWithPosition($2, constants::TYPESENSOR, $4, $3); printer->print(constants::PRINTMARKSENSOR,$2);}	
-	| DEFINITIONACTUATOR VARIABLE sensorOrActuator VARIABLE ';' {initializeSensorWithPosition($2, constants::TYPEACTUATOR, $4, $3);printer->print(constants::PRINTDISABLEACTUATOR,$2);}
+definition: DEFINITIONSENSOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>'';' {initializeSensor($2, constants::TYPESENSOR, $5, $7, $3); printer->print(constants::PRINTMARKSENSOR,$2); {printer->printPause(constants::PAUSETIME);}}
+	| DEFINITIONACTUATOR VARIABLE sensorOrActuator '<' ENTERO ',' ENTERO '>' ';' {initializeSensor($2, constants::TYPEACTUATOR, $5, $7, $3);printer->print(constants::PRINTDISABLEACTUATOR,$2); {printer->printPause(constants::PAUSETIME);}}
+	| DEFINITIONSENSOR VARIABLE sensorOrActuator VARIABLE ';' {initializeSensorWithPosition($2, constants::TYPESENSOR, $4, $3); printer->print(constants::PRINTMARKSENSOR,$2); {printer->printPause(constants::PAUSETIME);}}	
+	| DEFINITIONACTUATOR VARIABLE sensorOrActuator VARIABLE ';' {initializeSensorWithPosition($2, constants::TYPEACTUATOR, $4, $3);printer->print(constants::PRINTDISABLEACTUATOR,$2); {printer->printPause(constants::PAUSETIME);}}
 	;
 
 /* Determines which kind of sensor or actuator is*/
@@ -227,9 +271,12 @@ sensorOrActuator: SENSORTEMPERATURE {$$ = constants::TYPETEMPERATURE;}
 	;
 
 /* This zone is defined recursively as a set of data instructions */
-dataZone:
-	| dataZone data
-	;	
+dataZone: dataSet {printer->printPause(constants::PAUSETIME);}
+	;
+	
+dataSet: 
+	| dataSet data
+	;
 
 /* Here is where sensors take data that could be either integer or real */
 data: VARIABLE REAL ';' {setValue($1,$2);printer->print(constants::PRINTVALUESENSOR,$1);}
@@ -237,7 +284,7 @@ data: VARIABLE REAL ';' {setValue($1,$2);printer->print(constants::PRINTVALUESEN
 	;
 
 /* In this part we could have actions, control sentences or variable assignments*/
-behaviourZone:
+behaviourZone: 
 	| behaviourZone behaviour
 	| behaviourZone assignment
 	| behaviourZone actions

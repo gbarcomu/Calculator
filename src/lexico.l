@@ -38,6 +38,7 @@ int n_lineas;
 "desactivar"			return DESACTIVATE;
 "pausa"					return PAUSE;
 "escribir"				return WRITE;
+"plano"					return PLANO;
 
 ["][A-Za-z ]*["] 		yylval.cadena = new char; strcpy(yylval.cadena,yytext);return TEXT;
 [A-Za-z_][A-Za-z1-9_]*	yylval.cadena = new char; strcpy(yylval.cadena,yytext);return VARIABLE;

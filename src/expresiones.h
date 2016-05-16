@@ -55,24 +55,25 @@ extern int yydebug;
     ENTERO = 265,
     REAL = 266,
     IDENTIFICADOR = 267,
-    DEFINITIONSENSOR = 268,
-    DEFINITIONACTUATOR = 269,
-    SENSORTEMPERATURE = 270,
-    SENSORBRIGHTNESS = 271,
-    SENSORSMOKE = 272,
-    ACTUATORALARM = 273,
-    ACTUATORLIGHT = 274,
-    ACTIVATE = 275,
-    DESACTIVATE = 276,
-    PAUSE = 277,
-    WRITE = 278,
-    DEFINITIONINTEGER = 279,
-    DEFINITIONREAL = 280,
-    DEFINITIONPOSITION = 281,
-    IF = 282,
-    ELSE = 283,
-    WHILE = 284,
-    menosunario = 285
+    PLANO = 268,
+    DEFINITIONSENSOR = 269,
+    DEFINITIONACTUATOR = 270,
+    SENSORTEMPERATURE = 271,
+    SENSORBRIGHTNESS = 272,
+    SENSORSMOKE = 273,
+    ACTUATORALARM = 274,
+    ACTUATORLIGHT = 275,
+    ACTIVATE = 276,
+    DESACTIVATE = 277,
+    PAUSE = 278,
+    WRITE = 279,
+    DEFINITIONINTEGER = 280,
+    DEFINITIONREAL = 281,
+    DEFINITIONPOSITION = 282,
+    IF = 283,
+    ELSE = 284,
+    WHILE = 285,
+    menosunario = 286
   };
 #endif
 
@@ -81,7 +82,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 156 "expresiones.y" /* yacc.c:1909  */
+#line 186 "expresiones.y" /* yacc.c:1909  */
 
 
   short typeOfVariable;
@@ -89,7 +90,7 @@ union YYSTYPE
   char* cadena;
   bool logico;
 
-#line 93 "expresiones.h" /* yacc.c:1909  */
+#line 94 "expresiones.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

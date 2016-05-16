@@ -8,6 +8,8 @@ posicion p_inicial, p_s_humo;
 p_inicial = <0,0>;
 p_s_humo = <50*2,180>;
 
+plano = {p_inicial, <0,columna>, <fila-150,columna>,<fila-150,columna-50>,<fila,columna-50>, <fila,0>};
+
 Sensor A temperatura <100,100>;
 Sensor H humo p_s_humo;
 Actuador L_1 luz <250,100>;

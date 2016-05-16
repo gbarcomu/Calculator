@@ -98,6 +98,17 @@ void Printer::printEndLine() {
 	outputFlow << endl;
 }
 
+void Printer::printPlanoLinePair(pair<float,float> first, pair<float,float> second) {
+
+	outputFlow << "linea(" << first.first << "," << first.second << "," << second.first << "," << second.second << ");" << endl;
+}
+
+void Printer::printPlanoLinePosition(pair<float,float> first, string key) {
+
+	VariableDetail variableDetail = hashTable->getValueByKey(key);
+	outputFlow << "linea(" << first.first << "," << first.second << "," << variableDetail.position1 << "," << variableDetail.position2 << ");" << endl;
+}
+
 Printer::~Printer() {
 
 	outputFlow << endl << "fin()" << endl << "return 0;" << endl << "}" << endl;

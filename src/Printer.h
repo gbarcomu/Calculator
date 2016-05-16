@@ -29,6 +29,8 @@ public:
 
 	void printPause(int seconds);
 	void printEndLine();
+	void printPlanoLinePair(pair<float,float> first, pair<float,float> second);
+	void printPlanoLinePosition(pair<float,float> first, string key);
 
 	~Printer();
 };
