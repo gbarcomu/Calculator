@@ -17,10 +17,9 @@ const short TYPEPOSITION = 8;
 const short TYPESENSOR = 9;
 const short TYPEACTUATOR = 10;
 
-const short ERRORMODULE = 3;
+const short ERRORPOSITIONINARITHMETIC = 3;
 const short ERRORNONDECLARED = 4;
-const short ERRORTYPESNOTMATCH = 5;
-const short ERRORLOGICALASSIGNMENT = 6;
+const short ERRORREDEFINED = 5;
 
 const short TYPETEMPERATURE = 11;
 const short TYPEBRIGHTNESS = 12;

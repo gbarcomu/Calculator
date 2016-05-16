@@ -15,12 +15,13 @@ void Printer::init() {
 
 Printer::Printer(HashTable *_hashTable, string outputName) {
 
-	string name;
-	name = outputName.substr(0, outputName.length() - 4) + ".cpp";
-	outputFlow.open("outputFiles/" + name);
-	hashTable = _hashTable;
+	nameFile = outputName.substr(0, outputName.length() - 4) + ".cpp";
 
-	cout << "Creating " << name << " file" << endl;
+	outputFlow.open(nameFile);
+	hashTable = _hashTable;
+	printFile = true;
+
+	cout << "Creating " << nameFile << " file" << endl;
 
 	init();
 }
@@ -109,10 +110,25 @@ void Printer::printPlanoLinePosition(pair<float,float> first, string key) {
 	outputFlow << "linea(" << first.first << "," << first.second << "," << variableDetail.position1 << "," << variableDetail.position2 << ");" << endl;
 }
 
+void Printer::dontGenerateFile() {
+
+	printFile = false;
+	hashTable->dontPrintTable();
+}
+
 Printer::~Printer() {
 
 	outputFlow << endl << "fin()" << endl << "return 0;" << endl << "}" << endl;
-
 	outputFlow.close();
-}
+	if (!printFile) {
 
+		  if( remove(nameFile.c_str()) != 0 ) {
+
+			  cout << "Error deleting file" << endl;
+		  }
+		  else {
+
+			  cout << "File deleted" << endl;
+		  }
+	}
+}

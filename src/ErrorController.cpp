@@ -7,20 +7,23 @@
 
 #include "ErrorController.h"
 
-ErrorController::ErrorController() {
-	// TODO Auto-generated constructor stub
+ErrorController::ErrorController(Printer *_printer) {
 
+	printer = _printer;
 }
 
 void ErrorController::errorCatcher(short errorCode, const char* parameter1,
 		const char* parameter2, const char* parameter3) {
 
+	printer->dontGenerateFile();
+
 	cout << "Error semántico en la línea " << n_lineas << ", ";
+
 
 	switch (errorCode) {
 
-	case constants::ERRORMODULE:
-		cout << "el operador % no se puede usar con datos reales"
+	case constants::ERRORPOSITIONINARITHMETIC:
+		cout << "se ha utilizado la variable " << parameter1 << " de tipo posición en una operación aritmética"
 				<< endl;
 		break;
 
@@ -29,13 +32,9 @@ void ErrorController::errorCatcher(short errorCode, const char* parameter1,
 				<< endl;
 		break;
 
-	case constants::ERRORTYPESNOTMATCH:
-		cout << "la variable " << parameter1 << " es de tipo " << parameter2
-				<< " y no se le puede asignar un valor " << parameter3 << endl;
-		break;
-
-	case constants::ERRORLOGICALASSIGNMENT:
-		cout << "no se pueden realizar operaciones aritméticas con variables de tipo lógico" << endl;
+	case constants::ERRORREDEFINED:
+		cout << "se ha cambiado el tipo de la variable " << parameter1 << " de tipo posición"
+				<< endl;
 		break;
 	}
 }

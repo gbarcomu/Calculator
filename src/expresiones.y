@@ -82,6 +82,8 @@ short getType(string key) {
  */
 void setValue(string key, float value) {
 	
+	
+	
 	VariableDetail variableDetail = hashTable->getValueByKey(key);
 	variableDetail.value = value;
 	hashTable->insertValue(key,variableDetail);
@@ -219,11 +221,13 @@ void createFirstPositionWithPair(float position1, float position2) {
 %type <cadena> text
 
 /* Priority table */
+%left '='
+%left EQUALS NOTEQUALS
+%left '<' LOWEROREQUAL '>' GREATEROREQUAL
 %left '+' '-' 
-%left '*' '/' '%' 
-%right '^' 
-%left '(' ')'
+%left '*' '/' '%'
 %left menosunario
+%right '^'
 
 %%
 
@@ -279,8 +283,32 @@ dataSet:
 	;
 
 /* Here is where sensors take data that could be either integer or real */
-data: VARIABLE REAL ';' {setValue($1,$2);printer->print(constants::PRINTVALUESENSOR,$1);}
-	| VARIABLE ENTERO ';' {setValue($1,$2);printer->print(constants::PRINTVALUESENSOR,$1);}
+data: VARIABLE REAL ';' 
+	{
+		if(hashTable->checkValueByKey($1)){
+			   
+			setValue($1,$2);
+			printer->print(constants::PRINTVALUESENSOR,$1);   		   
+		}
+		else {
+			   
+			errorController->errorCatcher(constants::ERRORNONDECLARED, $1);
+			YYERROR;
+		}	
+	}
+	| VARIABLE ENTERO ';'
+	{
+		if(hashTable->checkValueByKey($1)){
+			   
+			setValue($1,$2);
+			printer->print(constants::PRINTVALUESENSOR,$1);   		   
+		}
+		else {
+			   
+			errorController->errorCatcher(constants::ERRORNONDECLARED, $1);
+			YYERROR;
+		}	
+	}
 	;
 
 /* In this part we could have actions, control sentences or variable assignments*/
@@ -325,52 +353,75 @@ repeat: ENTERO {whileTimes = $1;}
 
 /* Activate desactivate pause write, defined recursively*/
 actions: action ';'
-	| actions action ';'
 	;
 
 action: ACTIVATE VARIABLE ENTERO /* activate a actuator, pause of n seconds and desactivates the actuator*/ 
 	{
-		if(execute) { /*If there is an if acting, do or not do the action*/
-			if(!inWhile){ /*If there is a while acting repeats the instruction*/
-				printer->print(constants::PRINTENABLEACTUATOR,$2);printer->printPause($3);printer->print(constants::PRINTDISABLEACTUATOR,$2);;
-			}
-			else {
-				
-				whileInstructions.push_back(make_pair(constants::PRINTENABLEACTUATOR,$2));
-				
-				/*Using printer class in an incorrect way, second value is the number of seconds
-				 * of the pause parsed as a string
-				 */
-				ostringstream oss;
-				oss << $3;
-				whileInstructions.push_back(make_pair(constants::PRINTPAUSE,oss.str()));
-				whileInstructions.push_back(make_pair(constants::PRINTDISABLEACTUATOR,$2));
-			}
-		}
+		if(hashTable->checkValueByKey($2)){
+				   
+			if(execute) { /*If there is an if acting, do or not do the action*/
+				if(!inWhile){ /*If there is a while acting repeats the instruction*/
+					printer->print(constants::PRINTENABLEACTUATOR,$2);printer->printPause($3);printer->print(constants::PRINTDISABLEACTUATOR,$2);
+				}
+				else {
+					
+					whileInstructions.push_back(make_pair(constants::PRINTENABLEACTUATOR,$2));
+					
+					/*Using printer class in an incorrect way, second value is the number of seconds
+					 * of the pause parsed as a string
+					 */
+					ostringstream oss;
+					oss << $3;
+					whileInstructions.push_back(make_pair(constants::PRINTPAUSE,oss.str()));
+					whileInstructions.push_back(make_pair(constants::PRINTDISABLEACTUATOR,$2));
+				}
+			}    		   
+				}
+		else {
+				   
+			errorController->errorCatcher(constants::ERRORNONDECLARED, $2);
+			YYERROR;
+		}		
 	}
 	| ACTIVATE VARIABLE 
 	{
-		if(execute) { /*If there is an if acting, do or not do the action*/
-			if(!inWhile){ /*If there is a while acting repeats the instruction*/
-				printer->print(constants::PRINTENABLEACTUATOR,$2);
-			}
-			else {
-				
-				whileInstructions.push_back(make_pair(constants::PRINTENABLEACTUATOR,$2));
-			}
+		if(hashTable->checkValueByKey($2)){
+		   
+			if(execute) { /*If there is an if acting, do or not do the action*/
+				if(!inWhile){ /*If there is a while acting repeats the instruction*/
+					printer->print(constants::PRINTENABLEACTUATOR,$2);
+				}
+				else {
+					
+					whileInstructions.push_back(make_pair(constants::PRINTENABLEACTUATOR,$2));
+				}
+			}    		   
+		}
+		else {
+		   
+			errorController->errorCatcher(constants::ERRORNONDECLARED, $2);
+			YYERROR;
 		}
 	}
 	| DESACTIVATE VARIABLE
 	{
-		if(execute) { /*If there is an if acting, do or not do the action*/
-			if(!inWhile){ /*If there is a while acting repeats the instruction*/
-				printer->print(constants::PRINTDISABLEACTUATOR,$2);
-			}
-			else {
+		if(hashTable->checkValueByKey($2)){
+				   
+			if(execute) { /*If there is an if acting, do or not do the action*/
+				if(!inWhile){ /*If there is a while acting repeats the instruction*/
+					printer->print(constants::PRINTDISABLEACTUATOR,$2);
+				}
+				else {
 
-				whileInstructions.push_back(make_pair(constants::PRINTDISABLEACTUATOR,$2));
-			}
-		}
+					whileInstructions.push_back(make_pair(constants::PRINTDISABLEACTUATOR,$2));
+				}
+			}    		   
+				}
+		else {
+				   
+			errorController->errorCatcher(constants::ERRORNONDECLARED, $2);
+			YYERROR;
+		}		
 	}
 	| PAUSE ENTERO
 	{
@@ -412,15 +463,23 @@ action: ACTIVATE VARIABLE ENTERO /* activate a actuator, pause of n seconds and 
 	}
 	| WRITE VARIABLE text 
 	{
-		if(execute) { /*If there is an if acting, do or not do the action*/
-			if(!inWhile){ /*If there is a while acting repeats the instruction*/
-				printer->print(constants::PRINTMESSAGE,createMessageWithPosition($3,$2));
-			}
-			else {
+		if(hashTable->checkValueByKey($2)){
+				   
+			if(execute) { /*If there is an if acting, do or not do the action*/
+				if(!inWhile){ /*If there is a while acting repeats the instruction*/
+					printer->print(constants::PRINTMESSAGE,createMessageWithPosition($3,$2));
+				}
+				else {
 
-				whileInstructions.push_back(make_pair(constants::PRINTMESSAGE,createMessageWithPosition($3,$2)));
-			}
+					whileInstructions.push_back(make_pair(constants::PRINTMESSAGE,createMessageWithPosition($3,$2)));
+				}
+			}   		   
 		}
+		else {
+				   
+				errorController->errorCatcher(constants::ERRORNONDECLARED, $2);
+				YYERROR;
+		}		
 	}
 	;
 
@@ -484,11 +543,39 @@ variables: VARIABLE {variablesSeparatedComma.push($1);}
  * Just works with real and integers
  */	
 assignment: VARIABLE '=' arithmeticExpression ';' 
-	{ 
-	setValue($1, $3);
-	isReal = false;
+	{
+		if(hashTable->checkValueByKey($1)){
+			
+			if(getType($1) == constants::TYPEPOSITION) {
+				
+				errorController->errorCatcher(constants::ERRORREDEFINED, $1);
+			}
+			
+			else {
+				
+				setValue($1, $3); 
+			}				   
+		}
+		else {
+		   
+			errorController->errorCatcher(constants::ERRORNONDECLARED, $1);
+			YYERROR;
+		}
+		isReal = false;
 	}    
-    | VARIABLE '=' '<' arithmeticExpression ',' arithmeticExpression '>' ';'{setPosition($1,$4,$6);}    	       	 
+    | VARIABLE '=' '<' arithmeticExpression ',' arithmeticExpression '>' ';'    	       	 
+	{
+		if(hashTable->checkValueByKey($1)){
+		   
+			setPosition($1,$4,$6);  		   
+		}
+		else {
+		   
+			errorController->errorCatcher(constants::ERRORNONDECLARED, $1);
+			YYERROR;
+		}
+		isReal = false;
+	}    
     ;    	   
     	   
 /*
@@ -496,9 +583,32 @@ assignment: VARIABLE '=' arithmeticExpression ';'
  *  a + 5
  *  6.7 / 5.0
  */
-arithmeticExpression:    ENTERO                                {$$=$1;}
+arithmeticExpression:   ENTERO                                {$$=$1;}
 	   |                REAL                                  {$$=$1; isReal = true;} 
-       |                VARIABLE                         	  {$$=getValue($1);if(getType($1)==constants::TYPEREAL){isReal = true;}}
+       |                VARIABLE                         	  
+	   {
+    	   if(hashTable->checkValueByKey($1)){
+    		   
+    		   if (getType($1) == constants::TYPEPOSITION) {
+    			   
+        		   errorController->errorCatcher(constants::ERRORPOSITIONINARITHMETIC, $1);
+        		   YYERROR; 
+    		   }
+    		   
+    		   else {
+    			   
+        		   $$=getValue($1);
+        		   if(getType($1)==constants::TYPEREAL){
+        			   isReal = true;
+        		   } 
+    		   }   		   
+    	   }
+    	   else {
+    		   
+    		   errorController->errorCatcher(constants::ERRORNONDECLARED, $1);
+    		   YYERROR;
+    	   }
+       }
        | '-' arithmeticExpression  %prec menosunario           {$$=-$2;}
        | '(' arithmeticExpression ')'                          {$$=$2;}                   
        | arithmeticExpression '+' arithmeticExpression 		  {$$=$1+$3;}              
@@ -530,8 +640,8 @@ int main(int argc,char *argv[]){
      inWhile = false;
      
      hashTable = new HashTable();
-     errorController = new ErrorController();
      printer = new Printer(hashTable, argv[1]);
+     errorController = new ErrorController(printer);
      
      FILE *inputFile = fopen(argv[1], "r");
      yyin = inputFile;

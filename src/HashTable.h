@@ -32,9 +32,14 @@ private:
 
 unordered_map <string,VariableDetail> table;
 
+bool printTable;
+
 public:
 	HashTable();
+	void printHashTable();
 	~HashTable();
+
+	void dontPrintTable();
 
 	string myToString (float value);
 	void myToUpper (string &key);

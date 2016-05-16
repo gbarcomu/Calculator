@@ -40,7 +40,7 @@ int n_lineas;
 "escribir"				return WRITE;
 "plano"					return PLANO;
 
-["][A-Za-z ]*["] 		yylval.cadena = new char; strcpy(yylval.cadena,yytext);return TEXT;
+["][^"]*["] 		yylval.cadena = new char; strcpy(yylval.cadena,yytext);return TEXT;
 [A-Za-z_][A-Za-z1-9_]*	yylval.cadena = new char; strcpy(yylval.cadena,yytext);return VARIABLE;
 [0-9]+[.][0-9]*			yylval.value = atof(yytext);return REAL;
 [0-9]+					yylval.value = atof(yytext);return ENTERO;

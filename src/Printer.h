@@ -20,10 +20,15 @@ private:
 	HashTable *hashTable;
 	ofstream outputFlow;
 
+	bool printFile;
+	string nameFile;
+
 	void init();
 
 public:
 	Printer(HashTable *_hashTable, string outputName);
+
+	void dontGenerateFile();
 
 	void print(short typeOfSentence, string key);
 

@@ -10,6 +10,7 @@
 
 #include<iostream>
 #include "Constants.h"
+#include "Printer.h"
 
 extern int n_lineas;
 
@@ -17,8 +18,11 @@ using namespace std;
 
 class ErrorController {
 
+private:
+	Printer *printer;
+
 public:
-	ErrorController();
+	ErrorController(Printer *_printer);
 
 	void errorCatcher(short errorCode,const char *parameter1 = NULL, const char *parameter2 = NULL, const char *parameter3 = NULL);
 

@@ -9,6 +9,13 @@
 
 
 HashTable::HashTable() {
+
+	printTable = true;
+}
+
+void HashTable::dontPrintTable() {
+
+	printTable = false;
 }
 
 /**************PARSING METHODS********************************************/
@@ -136,7 +143,7 @@ bool HashTable::checkValueByKey(string key) {
 
 /****************************************************************************************************/
 
-HashTable::~HashTable() {
+void HashTable::printHashTable() {
 
 	/* Printing symbol table */
 
@@ -168,4 +175,12 @@ HashTable::~HashTable() {
 	cout << setfill('-') << setw(1) << "+" << setw(15) << "-" << setw(1) << "+"
 	<< setw(15) << "-" << setw(1) << "+" << setw(15) << "-" << setw(1)
 	<< "+" << setw(20) << "-" << setw(1) << "+" << endl;
+}
+
+HashTable::~HashTable() {
+
+	if (printTable) {
+
+		printHashTable();
+	}
 }
