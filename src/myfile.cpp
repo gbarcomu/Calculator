@@ -22,7 +22,7 @@ pausa (1);
 valor_sensor(100,100,Temperatura,25.5);
 valor_sensor(100,180,Humo,0.3);
 pausa (1);
-MostrarMensaje ("SIMULACION , fsf.d", 50,100);
+MostrarMensaje ("SIMULACION", 50,100);
 MostrarMensaje ("1", 0,0);
 activar_actuador(250,100,Luz,"L_1");
 activar_actuador(100,320,Alarma,"B");
