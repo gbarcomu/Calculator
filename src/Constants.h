@@ -35,6 +35,7 @@ const short PRINTDISABLEACTUATOR = 21;
 const short PRINTENABLEACTUATOR = 22;
 const short PRINTVALUESENSOR = 23;
 const short PRINTPAUSE = 24;
+const short PRINTMESSAGE = 25;
 
 
 }

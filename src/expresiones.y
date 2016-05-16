@@ -133,6 +133,24 @@ void initializeSensorWithPosition(string key, short type, string positionName, s
 	hashTable->insertValue(key,variableDetail);
 }
 
+/*
+ * Create message with information and position
+ */
+string createMessageWithPair(string text, float position1, float position2) {
+	
+	ostringstream oss;
+	oss << text << ", " << position1 << "," << position2;
+	return oss.str();
+}
+
+string createMessageWithPosition(string text, string key) {
+	
+	pair<float,float> _pair = getPosition(key);
+	ostringstream oss;
+	oss << text << ", " << _pair.first << "," << _pair.second;
+	return oss.str();
+}
+
 %}
 
 %union{
@@ -150,6 +168,7 @@ void initializeSensorWithPosition(string key, short type, string positionName, s
 %token EQUALS LOWEROREQUAL GREATEROREQUAL NOTEQUALS
 %token SEPARATOR /* %% */
 %token <cadena> VARIABLE
+%token <cadena> TEXT
 %token <value> ENTERO
 %token <value> REAL
 %token <value> IDENTIFICADOR
@@ -166,6 +185,7 @@ void initializeSensorWithPosition(string key, short type, string positionName, s
 %type <value> arithmeticExpression
 %type <logico> logicExpression
 %type <typeOfVariable> sensorOrActuator
+%type <cadena> text
 
 /* Priority table */
 %left '+' '-' 
@@ -228,17 +248,16 @@ behaviour: IF condition '[' behaviourZone ']' ';' 						   {execute = true;}
 	| IF condition '[' behaviourZone ']' _else '[' behaviourZone ']' ';'   {execute = true;}
 	| _while repeat '[' behaviourZone ']' ';'	  						   
 	{
-		for (int i = 0; i < whileTimes; i++) {
+		/*Repeat the instructions inside the list*/
+		for (int i = 0; i < whileTimes; i++) { 
 			
 			for (std::list <pair<short,string>>::iterator it=whileInstructions.begin(); it != whileInstructions.end(); ++it) {
 				
 				pair<short,string> _pair = (pair<short,string>)*it; 
-				
-				cout << _pair.first << _pair.second << endl;
 				printer->print(_pair.first, _pair.second);
 			}	
 		}
-		
+		whileInstructions.clear(); /* Empties the list */
 		inWhile = false;
 	}
 	;
@@ -320,8 +339,65 @@ action: ACTIVATE VARIABLE ENTERO /* activate a actuator, pause of n seconds and 
 			}
 		}
 	}
+	| WRITE text /*Type a message, position given by a pair or a position is optional*/
+	{
+		if(execute) { /*If there is an if acting, do or not do the action*/
+			if(!inWhile){ /*If there is a while acting repeats the instruction*/
+				printer->print(constants::PRINTMESSAGE,createMessageWithPair($2,0,0));
+			}
+			else {
+
+				whileInstructions.push_back(make_pair(constants::PRINTMESSAGE,createMessageWithPair($2,0,0)));
+			}
+		}
+	}
+	| WRITE '<' arithmeticExpression ',' arithmeticExpression '>' text
+	{
+		if(execute) { /*If there is an if acting, do or not do the action*/
+			if(!inWhile){ /*If there is a while acting repeats the instruction*/
+				printer->print(constants::PRINTMESSAGE,createMessageWithPair($7,$3,$5));
+			}
+			else {
+
+				whileInstructions.push_back(make_pair(constants::PRINTMESSAGE,createMessageWithPair($7,$3,$5)));
+			}
+		}
+	}
+	| WRITE VARIABLE text 
+	{
+		if(execute) { /*If there is an if acting, do or not do the action*/
+			if(!inWhile){ /*If there is a while acting repeats the instruction*/
+				printer->print(constants::PRINTMESSAGE,createMessageWithPosition($3,$2));
+			}
+			else {
+
+				whileInstructions.push_back(make_pair(constants::PRINTMESSAGE,createMessageWithPosition($3,$2)));
+			}
+		}
+	}
 	;
 
+text: TEXT {$$ = $1;} 
+	| arithmeticExpression  /* Method to convert the arithmetic expression to " value " as a char* */
+	{
+		ostringstream oss;
+		oss << "\"" << $1 << "\"";
+		string var = oss.str();
+		char* c;
+		strcpy(c, var.c_str());
+		$$ = c;
+	}
+	| logicExpression
+	{
+		ostringstream oss;
+		oss << "\"" << $1 << "\"";
+		string var = oss.str();
+		char* c;
+		strcpy(c, var.c_str());
+		$$ = c;
+	}
+	;
+	
 /* Empties the stack and declares the variables */
 declaration: DEFINITIONINTEGER variables ';' 
     {

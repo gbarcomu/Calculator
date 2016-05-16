@@ -27,12 +27,13 @@ Printer::Printer(HashTable *_hashTable, string outputName) {
 
 void Printer::print(short typeOfSentence, string key) {
 
-	VariableDetail variableDetail = hashTable->getValueByKey(key);
+	VariableDetail variableDetail;
 
 	switch (typeOfSentence) {
 
 	case constants::PRINTMARKSENSOR:
 
+		variableDetail = hashTable->getValueByKey(key);
 		outputFlow << "marca_sensor(" << variableDetail.position1 << ","
 				<< variableDetail.position2 << ","
 				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
@@ -41,6 +42,7 @@ void Printer::print(short typeOfSentence, string key) {
 
 	case constants::PRINTDISABLEACTUATOR:
 
+		variableDetail = hashTable->getValueByKey(key);
 		outputFlow << "desactivar_actuador(" << variableDetail.position1 << ","
 				<< variableDetail.position2 << ","
 				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
@@ -50,6 +52,7 @@ void Printer::print(short typeOfSentence, string key) {
 
 	case constants::PRINTENABLEACTUATOR:
 
+		variableDetail = hashTable->getValueByKey(key);
 		outputFlow << "activar_actuador(" << variableDetail.position1 << ","
 				<< variableDetail.position2 << ","
 				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
@@ -59,6 +62,7 @@ void Printer::print(short typeOfSentence, string key) {
 
 	case constants::PRINTVALUESENSOR:
 
+		variableDetail = hashTable->getValueByKey(key);
 		outputFlow << "valor_sensor(" << variableDetail.position1 << ","
 				<< variableDetail.position2 << ","
 				<< hashTable->sensorActuatorInfo(variableDetail.specificType)
@@ -69,6 +73,12 @@ void Printer::print(short typeOfSentence, string key) {
 	case constants::PRINTPAUSE:
 
 		outputFlow << "pausa (" << key << ");" << endl;
+
+		break;
+
+	case constants::PRINTMESSAGE:
+
+		outputFlow << "MostrarMensaje (" << key << ");" << endl;
 
 		break;
 

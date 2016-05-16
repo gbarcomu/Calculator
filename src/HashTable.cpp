@@ -54,19 +54,19 @@ string HashTable::sensorActuatorInfo(short specificType) {
 	switch (specificType) {
 
 	case constants::TYPETEMPERATURE:
-		response << "temperatura";
+		response << "Temperatura";
 		break;
 	case constants::TYPEBRIGHTNESS:
-		response << "brillo";
+		response << "Brillo";
 		break;
 	case constants::TYPESMOKE:
-		response << "humo";
+		response << "Humo";
 		break;
 	case constants::TYPEALARM:
-		response << "alarma";
+		response << "Alarma";
 		break;
 	case constants::TYPELIGHT:
-		response << "luz";
+		response << "Luz";
 		break;
 	default :
 		response << " ";

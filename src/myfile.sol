@@ -1,3 +1,4 @@
+#Zona de definiciones
 entero columna;
 entero fila;
 columna = 30*10 + 100;
@@ -14,13 +15,17 @@ Actuador L_2 luz <250,200>;
 Actuador B alarma <100,320>;
 
 %%
+#Zona de la detección de datos
 A 25.5;
 H 0.3;
 
 %%
-valor_umbral = 30.0;
+#Zona de la descripción del comportamiento
+valor_umbral = 5.0;
+escribir <50,50*2> "SIMULACION";
+escribir 1/1;
 
-si A > valor_umbral [
+si A > valor_umbral [     #si la temperatura supera un umbral, se activa una señal sonora y se encienden las luces
 	activar L_1;
 	
 	repite 3 [

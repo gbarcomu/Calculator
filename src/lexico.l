@@ -6,7 +6,14 @@ int n_lineas;
 
 %option noyywrap
 
+%x COM
+
 %%
+
+"#"						BEGIN(COM);
+<COM>"\n"				BEGIN(0);
+
+<COM>.					;
 
 "<="					return LOWEROREQUAL;
 ">="					return GREATEROREQUAL;
@@ -30,10 +37,9 @@ int n_lineas;
 "activar"				return ACTIVATE;
 "desactivar"			return DESACTIVATE;
 "pausa"					return PAUSE;
-"escribir"				return WRITE /*TODO detectar cadena caracteres y comentarios limpiar esto de una vez!!*/;
+"escribir"				return WRITE;
 
-
-
+["][A-Za-z ]*["] 		yylval.cadena = new char; strcpy(yylval.cadena,yytext);return TEXT;
 [A-Za-z_][A-Za-z1-9_]*	yylval.cadena = new char; strcpy(yylval.cadena,yytext);return VARIABLE;
 [0-9]+[.][0-9]*			yylval.value = atof(yytext);return REAL;
 [0-9]+					yylval.value = atof(yytext);return ENTERO;
